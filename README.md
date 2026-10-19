@@ -1,6 +1,21 @@
 # Own Health (Web3 AI Healthcare Web Application)
 
+[![Live Demo on Vercel](https://img.shields.io/badge/Live_Demo-ownhealth.vercel.app-0070f3?style=for-the-badge&logo=vercel&logoColor=white)](https://ownhealth.vercel.app)
+[![Ethereum Sepolia](https://img.shields.io/badge/Ethereum-Sepolia_Testnet-627EEA?style=for-the-badge&logo=ethereum&logoColor=white)](https://sepolia.etherscan.io)
+[![Stellar Horizon](https://img.shields.io/badge/Stellar-Testnet_Logging-08B5E5?style=for-the-badge&logo=stellar&logoColor=white)](https://stellar.expert/explorer/testnet)
+[![Next.js 14](https://img.shields.io/badge/Next.js-14_App_Router-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
+
 > **Decentralized, AI-powered healthcare platform bridging patients and clinicians with biomarker lab analysis, natural lifestyle protocols, instant WhatsApp doctor triage, and dual-chain blockchain record immutability.**
+
+---
+
+## 🌐 Live Production Deployment
+
+- 🚀 **Live Web App:** **[https://ownhealth.vercel.app](https://ownhealth.vercel.app)**
+- 🔑 **Instant Demo Login:** **[https://ownhealth.vercel.app/login](https://ownhealth.vercel.app/login)**
+- 🧪 **AI Lab Report Upload:** **[https://ownhealth.vercel.app/patient/upload](https://ownhealth.vercel.app/patient/upload)**
+- 📊 **Patient Telemetry & Lifestyle Cures:** **[https://ownhealth.vercel.app/patient/dashboard](https://ownhealth.vercel.app/patient/dashboard)**
+- 🩺 **Doctor Triage Command Center:** **[https://ownhealth.vercel.app/doctor/dashboard](https://ownhealth.vercel.app/doctor/dashboard)**
 
 ---
 
