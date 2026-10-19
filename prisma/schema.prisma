@@ -1,0 +1,72 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id              String              @id @default(cuid())
+  phone           String              @unique
+  role            String              @default("PATIENT") // "PATIENT" | "DOCTOR"
+  name            String
+  email           String?
+  specialty       String?             // e.g., "Cardiologist & Metabolic Health Specialist"
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  reports         LabReport[]
+  patientAlerts   ConsultationAlert[] @relation("PatientAlerts")
+  doctorAlerts    ConsultationAlert[] @relation("DoctorAlerts")
+}
+
+model LabReport {
+  id               String              @id @default(cuid())
+  patientId        String
+  patient          User                @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  originalFileName String
+  fileUrl          String
+  ipfsCid          String?
+  sepoliaTxHash    String?
+  stellarTxHash    String?
+  createdAt        DateTime            @default(now())
+  analysis         AnalysisResult?
+  alerts           ConsultationAlert[]
+}
+
+model AnalysisResult {
+  id                       String    @id @default(cuid())
+  reportId                 String    @unique
+  report                   LabReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  extractedBiomarkers      String    // JSON string representation of biomarkers array
+  anomalies                String    // JSON string representation of flagged anomalies
+  lifestyleRecommendations String    // JSON string of yoga, diet, sleep, stress protocols
+  overallScore             Int       @default(80) // 0-100 Health Score
+  summary                  String?   // Clinical narrative overview
+  createdAt                DateTime  @default(now())
+}
+
+model ConsultationAlert {
+  id              String    @id @default(cuid())
+  patientId       String
+  patient         User      @relation("PatientAlerts", fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId        String?
+  doctor          User?     @relation("DoctorAlerts", fields: [doctorId], references: [id])
+  reportId        String
+  report          LabReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  status          String    @default("PENDING") // PENDING, REVIEWED, RESOLVED
+  whatsappSent    Boolean   @default(false)
+  criticalMarkers String?   // Comma-separated or JSON list of urgent biomarkers
+  doctorNotes     String?
+  createdAt       DateTime  @default(now())
+}
+
+model OtpVerification {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
