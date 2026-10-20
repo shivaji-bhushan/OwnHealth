@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { UserSession } from "@/types";
+import { prisma } from "@/lib/prisma";
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "ownhealth-super-secure-jwt-secret-key-32charsmin!"
@@ -44,7 +45,34 @@ export async function getCurrentUser(): Promise<UserSession | null> {
     const cookieStore = cookies();
     const token = cookieStore.get(TOKEN_COOKIE_NAME)?.value;
     if (!token) return null;
-    return await verifySessionToken(token);
+    const session = await verifySessionToken(token);
+    if (!session?.id) return null;
+
+    // Verify user actually exists in the database to prevent foreign key errors with stale sessions
+    const user = await prisma.user.findUnique({
+      where: { id: session.id },
+      select: {
+        id: true,
+        phone: true,
+        name: true,
+        role: true,
+        email: true,
+        specialty: true,
+      },
+    });
+
+    if (!user) {
+      return null;
+    }
+
+    return {
+      id: user.id,
+      phone: user.phone,
+      name: user.name,
+      role: user.role as "PATIENT" | "DOCTOR",
+      email: user.email || undefined,
+      specialty: user.specialty || undefined,
+    };
   } catch (error) {
     return null;
   }

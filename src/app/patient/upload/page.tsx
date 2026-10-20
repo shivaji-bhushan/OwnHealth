@@ -104,19 +104,34 @@ export default function PatientUploadPage() {
   const handleFileSelected = (file: File) => {
     setSelectedFile(file);
     setFileName(file.name);
-    // Read text from file if possible
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const text = ev.target?.result as string;
-      setReportText(text || "");
-    };
-    reader.readAsText(file);
+    setError(null);
+
+    const isText =
+      file.type.startsWith("text/") ||
+      file.name.endsWith(".txt") ||
+      file.name.endsWith(".csv");
+
+    if (isText) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const text = ev.target?.result as string;
+        setReportText(text || "");
+      };
+      reader.readAsText(file);
+    } else {
+      // For PDFs and images, do not dump raw binary bytes
+      const sizeKb = (file.size / 1024).toFixed(1);
+      setReportText(
+        `[Attached Medical Document: ${file.name} (${sizeKb} KB)]\nDocument ready for AI clinical pathology extraction, anomaly scanning, and Web3 multi-chain anchoring.`
+      );
+    }
   };
 
   const handleSelectPreset = (preset: SampleReportPreset) => {
     setSelectedFile(null);
     setFileName(preset.fileName);
     setReportText(preset.rawText);
+    setError(null);
   };
 
   const executePipeline = async () => {
@@ -139,8 +154,10 @@ export default function PatientUploadPage() {
       if (selectedFile) {
         formData.append("file", selectedFile);
       }
-      formData.append("text", reportText);
-      formData.append("fileName", fileName || "lab_report.pdf");
+      if (reportText && !reportText.startsWith("[Attached Medical Document:")) {
+        formData.append("text", reportText);
+      }
+      formData.append("fileName", fileName || selectedFile?.name || "lab_report.pdf");
 
       const res = await fetch("/api/reports/upload", {
         method: "POST",
@@ -231,7 +248,9 @@ export default function PatientUploadPage() {
                     <div>
                       <h4 className="text-sm font-bold text-slate-900">{fileName}</h4>
                       <span className="text-[11px] text-slate-400">
-                        {reportText.length} characters loaded
+                        {selectedFile
+                          ? `${(selectedFile.size / 1024).toFixed(1)} KB file loaded`
+                          : `${reportText.length} characters loaded`}
                       </span>
                     </div>
                   </div>
@@ -240,6 +259,7 @@ export default function PatientUploadPage() {
                       setSelectedFile(null);
                       setFileName("");
                       setReportText("");
+                      setError(null);
                     }}
                     className="text-xs font-semibold text-red-600 hover:underline"
                   >
@@ -247,9 +267,23 @@ export default function PatientUploadPage() {
                   </button>
                 </div>
 
-                <div className="max-h-40 overflow-y-auto rounded-xl bg-slate-50 p-3 text-xs font-mono text-slate-700 border border-slate-200/70 whitespace-pre-wrap">
-                  {reportText}
-                </div>
+                {reportText.startsWith("[Attached Medical Document:") ? (
+                  <div className="rounded-xl bg-emerald-50/70 p-4 text-xs text-emerald-800 border border-emerald-200/80 flex items-start gap-2.5">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="font-semibold text-slate-900">
+                        {fileName} attached successfully.
+                      </p>
+                      <p className="text-[11px] text-slate-600">
+                        Our clinical AI pipeline will extract blood panels, metabolic markers, and lipid profiles from this document upon submission.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="max-h-40 overflow-y-auto rounded-xl bg-slate-50 p-3 text-xs font-mono text-slate-700 border border-slate-200/70 whitespace-pre-wrap">
+                    {reportText}
+                  </div>
+                )}
               </div>
             )}
 
