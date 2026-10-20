@@ -9,6 +9,11 @@ const nextConfig = {
       },
     ],
   },
+  experimental: {
+    outputFileTracingIncludes: {
+      "/**": ["./prisma/**/*"],
+    },
+  },
   webpack: (config) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
